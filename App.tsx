@@ -4,9 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
-import { Archivo_400Regular, Archivo_500Medium, Archivo_600SemiBold } from '@expo-google-fonts/archivo';
-import { Chivo_300Light, Chivo_400Regular, Chivo_500Medium } from '@expo-google-fonts/chivo';
-import { ChivoMono_400Regular, ChivoMono_500Medium } from '@expo-google-fonts/chivo-mono';
 
 import { BorradorAudio, GastoBorrador, GastoFijo, Ingreso } from './src/types';
 import { MonedaProvider } from './src/context/MonedaContext';
@@ -46,15 +43,26 @@ void SplashScreen.preventAutoHideAsync();
  * pantallas.
  */
 export default function App() {
+  // Los .ttf viven en assets/fonts y no en @expo-google-fonts a proposito.
+  //
+  // Importarlos del paquete hace que el export los emita bajo
+  // assets/node_modules/..., y los hostings estaticos descartan del deploy todo
+  // lo que cuelgue de un node_modules: las fuentes daban 404 en produccion, la
+  // promesa de useFonts nunca resolvia y la app entera se quedaba en blanco
+  // -abajo hay un `return null` esperando fontsListas-. Sin sintomas en local,
+  // donde los archivos si estaban.
+  //
+  // De paso pesa menos: el paquete trae las 18 variantes de cada familia y
+  // aca estan solo las 8 que se usan.
   const [fontsListas] = useFonts({
-    Chivo_300Light,
-    Chivo_400Regular,
-    Chivo_500Medium,
-    Archivo_400Regular,
-    Archivo_500Medium,
-    Archivo_600SemiBold,
-    ChivoMono_400Regular,
-    ChivoMono_500Medium,
+    Chivo_300Light: require('./assets/fonts/Chivo_300Light.ttf'),
+    Chivo_400Regular: require('./assets/fonts/Chivo_400Regular.ttf'),
+    Chivo_500Medium: require('./assets/fonts/Chivo_500Medium.ttf'),
+    Archivo_400Regular: require('./assets/fonts/Archivo_400Regular.ttf'),
+    Archivo_500Medium: require('./assets/fonts/Archivo_500Medium.ttf'),
+    Archivo_600SemiBold: require('./assets/fonts/Archivo_600SemiBold.ttf'),
+    ChivoMono_400Regular: require('./assets/fonts/ChivoMono_400Regular.ttf'),
+    ChivoMono_500Medium: require('./assets/fonts/ChivoMono_500Medium.ttf'),
   });
 
   const [sesionLista, setSesionLista] = useState(false);
