@@ -14,7 +14,7 @@ import { Eyebrow, Hello, HelloDim } from '../components/primitives';
 import { IconMicFilled, IconStop } from '../components/Icons';
 import { Pantalla } from '../components/Pantalla';
 import { colors, fonts, tracking } from '../theme';
-import { formatFechaCorta, formatFechaHoraMeta } from '../utils/format';
+import { formatFechaCorta, saludo, formatFechaHoraMeta } from '../utils/format';
 import { procesarAudio } from '../api/pocket';
 
 /** Estados por los que pasa el boton de grabar */
@@ -219,11 +219,11 @@ Probá de nuevo o cargalo a mano.`, [
   return (
     <Pantalla>
       <Eyebrow>{formatFechaCorta(hoy)}</Eyebrow>
-      {/* Sin nombre: la identificacion es anonima por dispositivo y la app
-          nunca pregunta como se llama nadie. El "Lauta" que estaba aca venia
-          del mockup y saludaba por su nombre a cualquiera que la abriera. */}
+      {/* Sin nombre y segun la hora: la identificacion es anonima por
+          dispositivo, asi que la hora es lo unico que sabemos de quien esta
+          del otro lado. El "Lauta" que estaba aca venia del mockup. */}
       <Hello style={{ marginTop: 7 }}>
-        Buenas.{'\n'}
+        {saludo(hoy)}.{'\n'}
         <HelloDim>¿Qué gastaste hoy?</HelloDim>
       </Hello>
 

@@ -77,6 +77,24 @@ export function formatFechaCorta(fecha: Date): string {
   return `${DIAS_CORTOS[fecha.getDay()]} ${fecha.getDate()} ${MESES[fecha.getMonth()].slice(0, 3)}`;
 }
 
+/**
+ * `Buen día` / `Buenas tardes` / `Buenas noches` — el saludo de la pantalla
+ * de registro.
+ *
+ * No lleva nombre: la identificacion es anonima por dispositivo y la app nunca
+ * pregunta como se llama nadie. La hora es lo unico que efectivamente sabemos
+ * de quien esta del otro lado.
+ *
+ * El corte de la manana va a las 5 y no a las 0: a las tres de la mañana
+ * todavia es "buenas noches" para cualquiera que este despierto.
+ */
+export function saludo(fecha: Date = new Date()): string {
+  const hora = fecha.getHours();
+  if (hora >= 5 && hora < 12) return 'Buen día';
+  if (hora >= 12 && hora < 20) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
 /** `Sábado 25 de julio` — subtitulo del formulario manual */
 export function formatFechaLarga(fecha: Date): string {
   const dias = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
