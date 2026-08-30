@@ -125,6 +125,29 @@ Probá de nuevo o cargalo a mano.`, [
     [onGastosDetectados, onCargarManual],
   );
 
+  /**
+   * Corta la grabacion y tira el audio: no se manda ni se procesa.
+   *
+   * Sin esto, equivocarse al hablar costaba una request igual, porque la unica
+   * forma de salir de la grabacion era el boton de stop, que manda derecho al
+   * backend. El cupo de audios es finito y trabarse dictando es lo mas comun
+   * que hay, asi que arrepentirse tiene que ser gratis.
+   */
+  const cancelarGrabacion = useCallback(() => {
+    void (async () => {
+      try {
+        // El stop igual va: es lo que libera el microfono. Lo que no va es el
+        // uri que deja, que simplemente se descarta.
+        await grabador.stop();
+      } catch (e) {
+        console.log('[pocket] fallo al cancelar la grabacion:', e);
+      } finally {
+        setEstado('listo');
+        setSegundos(0);
+      }
+    })();
+  }, [grabador]);
+
   const onPressGrabar = useCallback(() => {
     if (estado === 'procesando') return;
 
@@ -196,8 +219,11 @@ Probá de nuevo o cargalo a mano.`, [
   return (
     <Pantalla>
       <Eyebrow>{formatFechaCorta(hoy)}</Eyebrow>
+      {/* Sin nombre: la identificacion es anonima por dispositivo y la app
+          nunca pregunta como se llama nadie. El "Lauta" que estaba aca venia
+          del mockup y saludaba por su nombre a cualquiera que la abriera. */}
       <Hello style={{ marginTop: 7 }}>
-        Buenas, Lauta.{'\n'}
+        Buenas.{'\n'}
         <HelloDim>¿Qué gastaste hoy?</HelloDim>
       </Hello>
 
@@ -259,6 +285,21 @@ Probá de nuevo o cargalo a mano.`, [
             ? 'Tocá de nuevo cuando termines'
             : 'Podés decir varios de una:\n“cinco mil en facturas y veinte mil de nafta”'}
         </Text>
+
+        {/* Solo mientras se graba: una vez que el audio salio ya se gasto la
+            request y no hay nada que cancelar. */}
+        {grabando ? (
+          <Pressable
+            onPress={cancelarGrabacion}
+            accessibilityRole="button"
+            accessibilityLabel="Cancelar la grabación y descartar el audio"
+            hitSlop={8}
+          >
+            {({ pressed }) => (
+              <Text style={[s.cancelar, pressed && { opacity: 0.6 }]}>Cancelar</Text>
+            )}
+          </Pressable>
+        ) : null}
 
         {/* RF-11 — la salida manual siempre disponible */}
         <Pressable onPress={onCargarManual} accessibilityRole="button" hitSlop={8}>
@@ -339,6 +380,14 @@ const s = StyleSheet.create({
     marginTop: 9,
     textAlign: 'center',
     lineHeight: 12.5 * 1.65,
+  },
+  cancelar: {
+    fontFamily: fonts.archivoMedium,
+    fontSize: 13,
+    color: colors.dim,
+    marginTop: 18,
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
   manual: {
     fontFamily: fonts.archivoMedium,
