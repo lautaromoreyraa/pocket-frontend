@@ -36,8 +36,16 @@ import {
   mockRegistrarFijo,
   mockResumenFijos,
 } from '../data/mock';
-import { getDeviceUuid, nuevaIdempotencyKey, request, setToken } from './client';
+import {
+  ApiError,
+  getDeviceUuid,
+  getToken,
+  nuevaIdempotencyKey,
+  request,
+  setToken,
+} from './client';
 import { MOCK_DELAY, USE_MOCKS } from './config';
+import { obtenerTokenTurnstile } from './turnstile';
 import { periodoActual, sumarMeses } from '../utils/format';
 
 /**
@@ -57,12 +65,26 @@ export async function autenticarDispositivo(): Promise<void> {
     return;
   }
   const deviceUuid = await getDeviceUuid();
-  const { token } = await request<{ token: string }>('/api/auth/dispositivo', {
-    method: 'POST',
-    body: { deviceUuid },
-    publico: true,
-  });
-  await setToken(token);
+  const pedir = (turnstileToken?: string) =>
+    request<{ token: string }>('/api/auth/dispositivo', {
+      method: 'POST',
+      body: { deviceUuid, turnstileToken },
+      publico: true,
+    });
+
+  // Quien ya tiene sesion casi seguro ya existe en el backend, que solo pide
+  // Turnstile para los dispositivos nuevos: se ahorra el desafio al abrir.
+  const conocido = (await getToken()) !== null;
+  let respuesta: { token: string };
+  try {
+    respuesta = await pedir(conocido ? undefined : await obtenerTokenTurnstile());
+  } catch (e) {
+    // El JWT guardado puede ser de un usuario que ya no existe (base de la
+    // demo reseteada): para el backend es un alta nueva y pide el token.
+    if (!(conocido && e instanceof ApiError && e.status === 403)) throw e;
+    respuesta = await pedir(await obtenerTokenTurnstile());
+  }
+  await setToken(respuesta.token);
 }
 
 /** GET /api/categorias — RF-34, lista fija de solo lectura */
