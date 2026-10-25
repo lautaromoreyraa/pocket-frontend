@@ -73,4 +73,4 @@ Local notifications need a [development build](https://docs.expo.dev/develop/dev
 
 ## Deployment
 
-The web demo is a static export (`npx expo export --platform web`) with `EXPO_PUBLIC_API_URL` pointing to the production API.
+The web demo is a static export (`npx expo export --platform web`) uploaded to Vercel. The production API URL lives in the versioned `.env.production`, which Expo loads on export and inlines as `EXPO_PUBLIC_API_URL`; development keeps the fallback in `src/api/config.ts`.
