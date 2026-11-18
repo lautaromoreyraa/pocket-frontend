@@ -36,15 +36,6 @@ import {
   periodoSiguiente,
 } from '../utils/format';
 
-/**
- * `#manual` y `#edit` del mockup — RF-15: el formulario de carga manual y el
- * de correccion de un gasto detectado son EL MISMO componente, con distinto
- * estado inicial y distintos textos.
- *
- * Los montos se editan siempre en pesos, aunque la app este mostrando dolares:
- * lo que se persiste son pesos (RF-36) y pedir el monto en la moneda de
- * display seria una fuente de error.
- */
 
 export type ModoFormulario = 'manual' | 'correccion';
 
@@ -55,7 +46,6 @@ const MEDIOS: { valor: MedioPago; titulo: string }[] = [
   { valor: 'CREDITO', titulo: 'Crédito' },
 ];
 
-/** RF-20 — atajos de cuotas, mas ingreso manual con tope 60 */
 const ATAJOS_CUOTAS = [1, 3, 6, 12];
 const MAX_CUOTAS = 60;
 
@@ -71,20 +61,15 @@ export function GastoFormSheet({
 }: {
   visible: boolean;
   modo: ModoFormulario;
-  /** null cuando es un alta nueva */
   inicial: GastoBorrador | null;
-  /** texto chico bajo el titulo, del tipo "1 de los 2 que escuché" */
   subtitulo?: string;
   onGuardar: (borrador: GastoBorrador) => void;
   onCancelar: () => void;
-  /** RF-13 — solo en correccion: descartar este gasto de la tanda */
   onDescartar?: () => void;
   guardando?: boolean;
 }) {
   const insets = useSafeAreaInsets();
 
-  // El monto se guarda como string de digitos y se muestra con separador de
-  // miles, igual que en el mockup.
   const [montoTexto, setMontoTexto] = useState('');
   const [categoriaId, setCategoriaId] = useState<number | null>(null);
   const [descripcion, setDescripcion] = useState('');
@@ -92,14 +77,8 @@ export function GastoFormSheet({
   const [cuotas, setCuotas] = useState(1);
   const [cuotasLibres, setCuotasLibres] = useState(false);
   const [cuotasTexto, setCuotasTexto] = useState('9');
-  /**
-   * RF-46 — la clave se genera una vez por apertura del formulario y no cambia
-   * aunque el usuario toque Guardar dos veces. Eso es lo que hace que un
-   * reintento no duplique el gasto (RF-47).
-   */
   const [idempotencyKey, setIdempotencyKey] = useState('');
 
-  // Al abrirse, el formulario toma el estado inicial que le corresponda
   useEffect(() => {
     if (!visible) return;
     setMontoTexto(inicial?.monto != null ? agruparMiles(String(Math.round(inicial.monto))) : '');
@@ -129,14 +108,11 @@ export function GastoFormSheet({
     if (n >= 1 && n <= MAX_CUOTAS) setCuotas(n);
   };
 
-  /** RF-26 — antes de guardar, la app informa el valor de cada cuota y el mes */
   const hint = useMemo(() => {
     if (!esCredito) {
-      // RN-10 — la pestana se deriva del medio de pago
       return `SE SUMA A ${nombreMesUpper(periodo)} · PESTAÑA DÉBITO`;
     }
     if (cuotas < 2) {
-      // RN-03 — todo credito se imputa al mes siguiente, tenga cuotas o no
       return `SE SUMA A ${nombreMesUpper(periodoSiguiente(periodo))} · PESTAÑA CRÉDITO`;
     }
     const preview = calcularCuotas(monto, cuotas, periodo);
@@ -154,8 +130,6 @@ export function GastoFormSheet({
       categoriaId,
       descripcion: descripcion.trim(),
       medioPago,
-      // Al corregir un detectado se respeta la fecha que trajo el audio; una
-      // carga manual es de hoy. El backend rechaza fechas futuras.
       fechaGasto: inicial?.fechaGasto ?? hoyISO(),
       cantidadCuotas: esCredito ? cuotas : 1,
     });
@@ -243,7 +217,6 @@ export function GastoFormSheet({
               ))}
             </View>
 
-            {/* RF-20 — las cuotas solo aparecen con credito */}
             {esCredito ? (
               <View style={{ marginTop: 16 }}>
                 <Label>En cuántas cuotas</Label>

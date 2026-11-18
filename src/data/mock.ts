@@ -13,12 +13,6 @@ import {
 import { nuevaIdempotencyKey } from '../api/client';
 import { hoyISO, periodoActual, sumarMeses } from '../utils/format';
 
-/**
- * Datos de prueba. Son los mismos numeros que muestra docs/mockup.html, pero
- * anclados al mes en curso del telefono para que la app se vea viva.
- *
- * Todo esto desaparece cuando USE_MOCKS pase a false.
- */
 
 const HOY = new Date();
 const PERIODO = periodoActual(HOY);
@@ -169,7 +163,6 @@ export const MOCK_RESUMEN_CREDITO: ResumenMensual = {
   promedioHistorico: 398600,
 };
 
-/** Los 5 meses que ofrece el selector del historico, del mas viejo al mas nuevo */
 export const MOCK_PERIODOS_HISTORICOS: string[] = [-5, -4, -3, -2, -1].map((n) =>
   sumarMeses(PERIODO, n),
 );
@@ -246,7 +239,6 @@ export const MOCK_COTIZACION: Cotizacion = {
   desdeCache: false,
 };
 
-/** RF-41 — el borrador offline que aparece arriba de la pantalla de registro */
 export const MOCK_BORRADOR_AUDIO: BorradorAudio = {
   id: 'b1',
   grabadoEn: new Date(HOY.getTime() - 40 * 60 * 60 * 1000).toISOString(),
@@ -254,17 +246,6 @@ export const MOCK_BORRADOR_AUDIO: BorradorAudio = {
   sinConexion: true,
 };
 
-/**
- * RF-05 — lo que "escucha" la IA en un audio. Dos gastos, igual que el mockup.
- * Cada llamada devuelve claves de idempotencia nuevas (RF-46).
- */
-/**
- * Lista completa de movimientos de un periodo, para la pantalla "Todos los
- * movimientos". Se genera de forma determinista a partir del periodo, asi el
- * mismo mes siempre devuelve lo mismo y se puede comparar entre recargas.
- *
- * Reemplazado por GET /api/gastos?periodo=&credito= cuando USE_MOCKS sea false.
- */
 const PLANTILLA_DEBITO: { desc: string; catId: number; cat: string; medio: Gasto['medioPago']; base: number }[] = [
   { desc: 'Chino de la esquina', catId: 1, cat: 'Supermercado', medio: 'DEBITO', base: 12400 },
   { desc: 'Empanadas', catId: 2, cat: 'Delivery', medio: 'DEBITO', base: 8400 },
@@ -294,7 +275,6 @@ const PLANTILLA_CREDITO: { desc: string; catId: number; cat: string; base: numbe
   { desc: 'Camisa', catId: 9, cat: 'Ropa', base: 22500 },
 ];
 
-/** Hash simple del periodo, para que la variacion sea estable mes a mes */
 function semilla(periodo: string): number {
   let h = 0;
   for (const c of periodo) h = (h * 31 + c.charCodeAt(0)) % 9973;
@@ -304,20 +284,16 @@ function semilla(periodo: string): number {
 export function mockMovimientos(periodo: string, credito: boolean): Gasto[] {
   const s = semilla(periodo);
   const [anio, mes] = periodo.split('-').map(Number);
-  // En el mes en curso el ultimo dia util es hoy: no queremos gastos con fecha
-  // futura, que se leerian como un bug.
   const diasDelMes =
     periodo === PERIODO ? HOY.getDate() : new Date(anio, mes, 0).getDate();
 
   const plantilla = credito ? PLANTILLA_CREDITO : PLANTILLA_DEBITO;
-  // Entre el 60% y el 100% de la plantilla, segun el mes
   const cantidad = Math.max(3, plantilla.length - (s % Math.ceil(plantilla.length * 0.4)));
 
   return plantilla.slice(0, cantidad).map((p, i) => {
-    // Repartidos a lo largo del mes, del mas reciente al mas viejo
     const dia = Math.max(1, diasDelMes - Math.floor((i * diasDelMes) / cantidad) - ((s + i) % 2));
     const fecha = `${periodo}-${String(dia).padStart(2, '0')}`;
-    const variacion = 1 + (((s + i * 7) % 21) - 10) / 100; // ±10%
+    const variacion = 1 + (((s + i * 7) % 21) - 10) / 100;
     const esCuota = credito && 'cuota' in p && p.cuota !== undefined;
 
     return gasto({
@@ -332,22 +308,13 @@ export function mockMovimientos(periodo: string, credito: boolean): Gasto[] {
       compraFinanciadaId: esCuota ? `cf-${i}` : null,
       nroCuota: esCuota ? (p as { cuota: [number, number] }).cuota[0] : null,
       cantidadCuotas: esCuota ? (p as { cuota: [number, number] }).cuota[1] : null,
-      // RF-24 — las cuotas no computan como gasto hormiga
       hormiga: !esCuota && (p.catId === 2 || p.catId === 6),
       ocurrenciasCategoria: p.catId === 2 ? 7 : p.catId === 6 ? 4 : null,
     });
   });
 }
 
-// ---------------------------------------------------------------------------
-// Ingresos y gastos fijos
-//
-// A diferencia del resto del mock, esto es estado MUTABLE en memoria: hace
-// falta para que cargar un ingreso o tildar un fijo se vea reflejado en la
-// pantalla. Se pierde al recargar la app, que es lo esperable de un mock.
-// ---------------------------------------------------------------------------
 
-/** periodo -> ingreso del mes */
 const INGRESOS = new Map<string, Ingreso>([
   [PERIODO, { id: 'i1', monto: 850000, descripcion: 'Sueldo', periodo: PERIODO }],
 ]);
@@ -384,14 +351,6 @@ let FIJOS: GastoFijo[] = [
   { id: 'f6', descripcion: 'Spotify', monto: 5900, categoriaId: 6, categoriaNombre: 'Suscripciones', medioPago: 'CREDITO', diaDelMes: 28, activo: true },
 ];
 
-/**
- * periodo -> (fijoId -> el gasto generado)
- *
- * Guarda el monto ademas del id porque un fijo es variable: lo que se pago
- * puede no ser lo que dice la plantilla, y la pantalla muestra el real. La luz
- * del mock arranca mas cara que su plantilla justamente para que ese caso se
- * vea sin tener que provocarlo.
- */
 interface RegistroMock {
   gastoId: string;
   monto: number;
@@ -440,8 +399,6 @@ export function mockResumenFijos(periodo: string): ResumenFijos {
   return {
     periodo,
     items,
-    // El monto real donde ya lo hay, el de la plantilla donde todavia no:
-    // mismo criterio que el backend, para que el mock no mienta.
     totalEstimado: items
       .filter((i) => i.fijo.activo)
       .reduce((acc, i) => acc + (i.montoRegistrado ?? i.fijo.monto), 0),
@@ -449,15 +406,12 @@ export function mockResumenFijos(periodo: string): ResumenFijos {
   };
 }
 
-/** Tildar: materializa el fijo como un gasto real del periodo */
 export function mockRegistrarFijo(fijoId: string, periodo: string, monto: number): void {
   const delPeriodo = REGISTRADOS.get(periodo) ?? new Map<string, RegistroMock>();
   delPeriodo.set(fijoId, { gastoId: `gf-${fijoId}-${periodo}`, monto });
   REGISTRADOS.set(periodo, delPeriodo);
 }
 
-/** Destildar: borra el gasto generado. Se busca por gastoId porque es lo unico
- *  que tiene la pantalla a mano, igual que contra el backend real. */
 export function mockDesregistrarFijo(gastoId: string, periodo: string): void {
   const delPeriodo = REGISTRADOS.get(periodo);
   if (!delPeriodo) return;
@@ -466,7 +420,6 @@ export function mockDesregistrarFijo(gastoId: string, periodo: string): void {
   }
 }
 
-/** Corregir cuanto se pago este mes, sin tocar la plantilla */
 export function mockEditarMontoFijo(fijoId: string, periodo: string, monto: number): void {
   const registro = REGISTRADOS.get(periodo)?.get(fijoId);
   if (registro) registro.monto = monto;

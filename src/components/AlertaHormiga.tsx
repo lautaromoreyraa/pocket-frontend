@@ -5,11 +5,6 @@ import { AvisoHormiga } from '../types';
 import { colors, fonts, radius } from '../theme';
 import { IconAlert } from './Icons';
 
-/**
- * `.alert` — RF-27: gasto hormiga detectado.
- * Se arma el texto con el monto ya formateado, que viene del contexto de
- * moneda, para que respete el switch ARS/USD (RF-37).
- */
 export function AlertaHormiga({
   aviso,
   montoFormateado,

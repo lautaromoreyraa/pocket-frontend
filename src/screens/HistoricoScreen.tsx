@@ -10,14 +10,9 @@ import { getHistorico, getPeriodosHistoricos } from '../api/pocket';
 import { useMoneda } from '../context/MonedaContext';
 import { mesCorto, nombreMes, nombreMesAnio } from '../utils/format';
 
-/**
- * Pantalla Historico (`#p-his` del mockup).
- * RF-44, RF-45: selector de mes arriba, y abajo todo el periodo elegido.
- */
 export function HistoricoScreen({
   onVerMovimientos,
 }: {
-  /** RF-45 — abre la lista completa del mes elegido, en debito o en credito */
   onVerMovimientos: (periodo: string, credito: boolean) => void;
 }) {
   const { format } = useMoneda();
@@ -27,12 +22,10 @@ export function HistoricoScreen({
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Los meses disponibles se piden una sola vez
   useEffect(() => {
     getPeriodosHistoricos()
       .then((ps) => {
         setPeriodos(ps);
-        // arranca en el mes cerrado mas reciente
         setSeleccionado(ps[ps.length - 1] ?? null);
       })
       .catch(() => setError('No pude traer el histórico. Revisá la conexión.'))
@@ -64,7 +57,6 @@ export function HistoricoScreen({
         y cuánto te quedó. Los meses sin movimientos aparecen en cero.
       </Text>
 
-      {/* `.months` — carrusel horizontal de meses */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -86,7 +78,6 @@ export function HistoricoScreen({
         })}
       </ScrollView>
 
-      {/* Débito y Crédito son tocables: abren todos los movimientos del mes */}
       <Section titulo={nombreMesAnio(datos.periodo)} meta="cerrado">
         <StatRow
           etiqueta="Débito"
@@ -104,7 +95,6 @@ export function HistoricoScreen({
         ) : null}
       </Section>
 
-      {/* RF-29 / RF-30 — el promedio requiere mas de 2 meses de datos */}
       {datos.promedioHistorico !== null ? (
         <Section titulo="Contra tu promedio" meta={`${datos.mesesPromediados} meses`}>
           <BarRow
@@ -121,7 +111,6 @@ export function HistoricoScreen({
         </Section>
       ) : null}
 
-      {/* RF-27 — categorias que se repitieron en el periodo */}
       {datos.repeticiones.length > 0 ? (
         <Section titulo="Repeticiones" meta={nombreMes(datos.periodo)}>
           {datos.repeticiones.map((r, i) => (
@@ -140,7 +129,6 @@ export function HistoricoScreen({
   );
 }
 
-/** `.foot` — el veredicto contra el promedio. Rojo si se paso, gris si no. */
 function ComparacionPromedio({ total, promedio }: { total: number; promedio: number }) {
   const diferencia = Math.round(Math.abs((total - promedio) / promedio) * 100);
   const seExcedio = total > promedio;

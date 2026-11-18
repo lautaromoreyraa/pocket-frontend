@@ -10,12 +10,6 @@ import { colors, fonts, tracking } from '../theme';
 import { nombreCategoria } from '../data/categorias';
 import { useMoneda } from '../context/MonedaContext';
 
-/**
- * `#sheet` del mockup — RF-06 y RF-07.
- *
- * Muestra los N gastos que detecto la IA y permite editar cada uno antes de
- * guardar. Nada se persiste hasta que el usuario toque "Guardar" (RF-08).
- */
 export function ConfirmacionAudioSheet({
   visible,
   gastos,
@@ -80,7 +74,6 @@ export function ConfirmacionAudioSheet({
   );
 }
 
-/** "Escuché dos gastos" suena mejor que "Escuché 2 gastos" */
 function enLetras(n: number): string {
   const palabras = ['cero', 'un', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
   return palabras[n] ?? String(n);

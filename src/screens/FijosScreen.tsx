@@ -19,23 +19,6 @@ import { reprogramarAvisos } from '../notificaciones/fijos';
 import { useMoneda } from '../context/MonedaContext';
 import { nombreMes, periodoActual } from '../utils/format';
 
-/**
- * Pestana Fijos. No esta en docs/mockup.html: es una extension posterior, y
- * por eso reusa el lenguaje visual existente sin inventar estilos nuevos.
- *
- * Junta las dos cosas que definen la estructura del mes:
- *   - lo que entra: el ingreso (RF-32)
- *   - lo que sale si o si: los gastos fijos
- *
- * Los fijos son plantillas, no gastos. Cada mes se registran, y ahi si
- * generan un `gasto` real que suma a los totales y a la capacidad de ahorro.
- */
-/**
- * Un periodo puede tener varios ingresos (sueldo, un alquiler, un trabajo
- * suelto) pero esta pantalla muestra un solo numero. Los colapsa en uno
- * sintetico: el monto es la suma, y la etiqueta dice cuantos son cuando hay
- * mas de uno, para que no parezca que el sueldo entero es ese total.
- */
 function sumarIngresos(ingresos: Ingreso[]): Ingreso | null {
   if (ingresos.length === 0) return null;
   if (ingresos.length === 1) return ingresos[0];
@@ -51,7 +34,6 @@ export function FijosScreen({
   onEditarIngreso,
   onNuevoFijo,
   onEditarFijo,
-  /** cambia cuando algo de afuera modifico ingresos o fijos, para recargar */
   refresco,
 }: {
   periodo: string;
@@ -66,16 +48,12 @@ export function FijosScreen({
   const [totales, setTotales] = useState({ estimado: 0, registrado: 0 });
   const [ingreso, setIngreso] = useState<Ingreso | null>(null);
   const [error, setError] = useState<string | null>(null);
-  /** id del fijo cuyo tilde se esta guardando, para no dejar tocar dos veces */
   const [tildando, setTildando] = useState<string | null>(null);
-  /** el fijo cuyo monto del mes se esta editando; null = sheet cerrado */
   const [montoAbierto, setMontoAbierto] = useState<FijoDelPeriodo | null>(null);
   const [guardandoMonto, setGuardandoMonto] = useState(false);
 
   const cargar = useCallback(() => {
     setError(null);
-    // Las dos cargas son independientes a proposito: que falle una no tiene
-    // por que dejar la pantalla entera en un cartel de error.
     Promise.allSettled([getResumenFijos(periodo), getIngresos(periodo)]).then(
       ([resFijos, resIngresos]) => {
         if (resFijos.status === 'fulfilled') {
@@ -84,10 +62,6 @@ export function FijosScreen({
             estimado: resFijos.value.totalEstimado,
             registrado: resFijos.value.totalRegistrado,
           });
-          // Los recordatorios se reprograman con cada carga: es el momento en
-          // que tenemos la lista fresca, y asi tildar un fijo apaga su aviso
-          // sin que haga falta ninguna sincronizacion aparte. Que falle no
-          // puede romper la pantalla: es una comodidad, no el contenido.
           if (periodo === periodoActual()) {
             void reprogramarAvisos(resFijos.value.items).catch(() => undefined);
           }
@@ -95,7 +69,6 @@ export function FijosScreen({
           setItems([]);
           setError('No pude traer tus fijos. Revisá la conexión.');
         }
-        // La pantalla muestra un solo numero: el total de lo que entro.
         setIngreso(resIngresos.status === 'fulfilled' ? sumarIngresos(resIngresos.value) : null);
       },
     );
@@ -103,11 +76,6 @@ export function FijosScreen({
 
   useEffect(cargar, [cargar, refresco]);
 
-  /**
-   * El tilde es la existencia del gasto: tildar lo crea, destildar lo borra.
-   * Por eso una sola funcion, y por eso destildar no necesita confirmacion: lo
-   * que se deshace es el tilde de este mes, no la plantilla.
-   */
   const alternarTilde = useCallback(
     async (item: FijoDelPeriodo) => {
       setTildando(item.fijo.id);
@@ -116,9 +84,6 @@ export function FijosScreen({
         if (item.gastoId) {
           await desregistrarGastoFijo(item.gastoId, periodo);
         } else {
-          // Un tap registra con el monto de la plantilla. Si este mes vino
-          // distinto, se toca el numero y se corrige: la mayoria de los fijos
-          // no cambian nunca y no tienen por que pagar esa fricción.
           await registrarGastoFijo(item.fijo.id, periodo, item.fijo.monto);
         }
         cargar();
@@ -133,8 +98,6 @@ export function FijosScreen({
     [periodo, cargar],
   );
 
-  /** Guarda el monto del mes: si ya estaba tildado lo corrige, y si no, tilda
-   *  con el monto que el usuario acaba de escribir. */
   const guardarMontoDelMes = useCallback(
     async (monto: number) => {
       const item = montoAbierto;
@@ -174,7 +137,6 @@ export function FijosScreen({
         monto={format(totales.estimado)}
       />
 
-      {/* Lo que entra — RF-32 */}
       <Section titulo="Lo que entra" meta={nombreMes(periodo)}>
         {ingreso ? (
           <StatRow
@@ -198,7 +160,6 @@ export function FijosScreen({
         )}
       </Section>
 
-      {/* RF-31 — la cuenta que le importa al usuario */}
       {ingreso ? (
         <Section titulo="Después de los fijos" meta="estimado">
           <StatRow etiqueta="Ingreso" valor={format(ingreso.monto)} />
@@ -246,8 +207,6 @@ export function FijosScreen({
         </Section>
       ) : null}
 
-      {/* Un pausado no se espera este mes, asi que no tiene tilde ni monto que
-          corregir: tocarlo solo lleva a la plantilla, que es donde se reactiva. */}
       {pausados.length > 0 ? (
         <Section titulo="Pausados" meta={`${pausados.length}`}>
           {pausados.map((item, i) => (
@@ -293,16 +252,6 @@ export function FijosScreen({
   );
 }
 
-/**
- * Una fila de la lista de fijos, con tres zonas tocables y bien separadas:
- *
- *   el checkbox  -> ya lo pagué / todavía no
- *   el monto     -> cuánto pagué ESTE MES (los fijos son variables)
- *   el nombre    -> la plantilla: cuánto se espera todos los meses
- *
- * La distinción entre las dos últimas es la que importa: tocar el número
- * cambia un mes, tocar el nombre cambia todos los meses que vienen.
- */
 function FilaFijo({
   item,
   monto,
@@ -316,7 +265,6 @@ function FilaFijo({
   monto: string;
   ultima: boolean;
   ocupado?: boolean;
-  /** si no se pasan, la fila está pausada: no se espera este mes */
   onTildar?: () => void;
   onEditarMonto?: () => void;
   onEditar: () => void;
@@ -404,7 +352,6 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   checkOn: { backgroundColor: colors.acc, borderColor: colors.acc },
-  /** el hueco de un pausado: mantiene la grilla alineada sin sugerir que se puede tildar */
   checkVacio: { borderColor: 'transparent' },
 
   filaTxt: { flex: 1, minWidth: 0 },

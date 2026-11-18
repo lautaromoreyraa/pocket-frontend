@@ -11,15 +11,6 @@ import { getResumen } from '../api/pocket';
 import { useMoneda } from '../context/MonedaContext';
 import { nombreMes, periodoSiguiente } from '../utils/format';
 
-/**
- * Pantallas Debito (`#p-deb`) y Credito (`#p-cre`) del mockup.
- *
- * Las dos consultan el mismo endpoint y solo cambian el flag `credito`
- * (seccion 4.3 del escenario), asi que son un solo componente. Las diferencias
- * de contenido salen de la respuesta: `comprasEnCurso` y
- * `comprometidoDelPeriodo` solo vienen en credito, `balance` solo cuando
- * hay ingreso cargado (RF-33).
- */
 export function ResumenScreen({
   periodo,
   credito,
@@ -29,11 +20,8 @@ export function ResumenScreen({
 }: {
   periodo: string;
   credito: boolean;
-  /** abre la lista completa del periodo (RF-12) */
   onVerMovimientos: () => void;
-  /** abre el formulario de ingreso del mes (RF-32) */
   onEditarIngreso: () => void;
-  /** cambia cuando se modifico el ingreso desde otra pantalla, para recargar */
   refresco: number;
 }) {
   const { format } = useMoneda();
@@ -68,7 +56,6 @@ export function ResumenScreen({
         monto={format(resumen.total)}
       />
 
-      {/* RF-27 */}
       {resumen.avisoHormiga ? (
         <AlertaHormiga
           aviso={resumen.avisoHormiga}
@@ -76,7 +63,6 @@ export function ResumenScreen({
         />
       ) : null}
 
-      {/* RF-19 / RF-22 — solo en credito: el estado de las compras en cuotas */}
       {credito && resumen.comprasEnCurso.length > 0 ? (
         <Section
           titulo="Cuotas en curso"
@@ -104,7 +90,6 @@ export function ResumenScreen({
         </Section>
       ) : null}
 
-      {/* RF-28 */}
       {resumen.porCategoria.length > 0 ? (
         <Section titulo="Por categoría" meta={`${rubros} ${rubros === 1 ? 'rubro' : 'rubros'}`}>
           {resumen.porCategoria.map((c) => (
@@ -120,10 +105,8 @@ export function ResumenScreen({
         </Section>
       ) : null}
 
-      {/* RF-31 / RF-33 — sin ingreso cargado no se muestra la capacidad de ahorro */}
       {resumen.balance ? (
         <Section titulo="Balance" meta={nombreMes(resumen.periodo)}>
-          {/* RF-32 — tocar la fila abre el formulario de ingreso */}
           <StatRow
             etiqueta="Ingresos"
             valor={format(resumen.balance.ingresos)}
@@ -152,7 +135,6 @@ export function ResumenScreen({
         </Section>
       ) : null}
 
-      {/* RF-12 */}
       {resumen.ultimosMovimientos.length > 0 ? (
         <Section titulo="Movimientos" meta={`últimos ${resumen.ultimosMovimientos.length}`}>
           {resumen.ultimosMovimientos.map((g, i) => (
@@ -179,7 +161,6 @@ export function ResumenScreen({
   );
 }
 
-/** `SUPERMERCADO · EFECTIVO` — y el `7.ª VEZ` cuando es hormiga (RF-27) */
 function metaDeGasto(g: ResumenMensual['ultimosMovimientos'][number]): string {
   const partes = [g.categoriaNombre.toUpperCase(), etiquetaMedioPago(g)];
   if (g.hormiga && g.ocurrenciasCategoria) partes.push(`${g.ocurrenciasCategoria}.ª VEZ`);

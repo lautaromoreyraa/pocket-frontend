@@ -1,14 +1,5 @@
 import { Categoria } from '../types';
 
-/**
- * RF-34 — lista fija de categorias, de solo lectura.
- * Es la misma que seedea V2__seed_categorias.sql en el backend; el orden y los
- * ids tienen que coincidir. Mientras USE_MOCKS este en true se usa esta copia;
- * despues la reemplaza GET /api/categorias.
- *
- * El nombre corto es el que se muestra en los chips del formulario, donde no
- * entra "Delivery/Restaurantes" ni "Ropa/Indumentaria".
- */
 export interface CategoriaUI extends Categoria {
   nombreCorto: string;
 }
@@ -26,7 +17,6 @@ export const CATEGORIAS: CategoriaUI[] = [
   { id: 10, nombre: 'Hogar', nombreCorto: 'Hogar', icono: null, color: null, orden: 10 },
   { id: 11, nombre: 'Educación', nombreCorto: 'Educación', icono: null, color: null, orden: 11 },
   { id: 12, nombre: 'Mascotas', nombreCorto: 'Mascotas', icono: null, color: null, orden: 12 },
-  /** RF-35 — fallback */
   { id: 13, nombre: 'Otros', nombreCorto: 'Otros', icono: null, color: null, orden: 13 },
 ];
 
@@ -34,10 +24,8 @@ export function categoriaPorId(id: number | null): CategoriaUI | undefined {
   return CATEGORIAS.find((c) => c.id === id);
 }
 
-/** Nombre corto, en mayusculas, para los chips de metadatos */
 export function nombreCategoria(id: number | null): string {
   return categoriaPorId(id)?.nombreCorto ?? 'Otros';
 }
 
-/** RF-35 — la categoria de fallback */
 export const CATEGORIA_OTROS = CATEGORIAS[CATEGORIAS.length - 1];

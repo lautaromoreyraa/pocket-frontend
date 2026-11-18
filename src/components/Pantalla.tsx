@@ -4,11 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SCREEN_PADDING, colors, fonts } from '../theme';
 
-/**
- * `.body` — el contenedor scrolleable de cada pantalla. Centraliza el padding,
- * el respeto del notch y los estados de carga y error, que son iguales en las
- * cuatro secciones.
- */
 export function Pantalla({
   children,
   cargando = false,
