@@ -5,10 +5,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors, fonts, tracking } from '../theme';
 import { IconCard, IconCardCredit, IconChart, IconMic, IconRepeat } from './Icons';
 
-/**
- * Las secciones de la app. Las cuatro primeras son las de la seccion 4.3 del
- * escenario; "Fijos" es una extension posterior y va entre Credito e Historico.
- */
 export type Tab = 'registrar' | 'debito' | 'credito' | 'fijos' | 'historico';
 
 const TABS: { id: Tab; titulo: string; Icono: typeof IconMic }[] = [
@@ -19,10 +15,6 @@ const TABS: { id: Tab; titulo: string; Icono: typeof IconMic }[] = [
   { id: 'historico', titulo: 'Histórico', Icono: IconChart },
 ];
 
-/**
- * `.tabs` — barra inferior. Es estado local en App.tsx, sin libreria de
- * navegacion: la app no tiene stacks ni deep links, cuatro paneles alcanzan.
- */
 export function TabBar({ activa, onChange }: { activa: Tab; onChange: (t: Tab) => void }) {
   const insets = useSafeAreaInsets();
 
@@ -75,8 +67,6 @@ const s = StyleSheet.create({
   },
   txt: {
     fontFamily: fonts.archivoMedium,
-    // 9.5 en vez de 10: con cinco pestañas cada una tiene ~73px y "Histórico"
-    // no entraba en 10px
     fontSize: 9.5,
     letterSpacing: tracking(9.5, 0.01),
     color: colors.faint,

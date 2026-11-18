@@ -17,30 +17,16 @@ import { colors, fonts, tracking } from '../theme';
 import { formatFechaCorta, saludo, formatFechaHoraMeta } from '../utils/format';
 import { procesarAudio } from '../api/pocket';
 
-/** Estados por los que pasa el boton de grabar */
 type EstadoGrabacion = 'listo' | 'grabando' | 'procesando';
 
-/**
- * Pantalla Registrar (`#p-reg` del mockup).
- *
- * RF-04, RF-05, RF-09, RF-42.
- *
- * La grabacion usa expo-audio con el preset HIGH_QUALITY, que produce .m4a con
- * AAC en las dos plataformas. Es a proposito el mismo formato con el que se
- * valido a mano que el modelo transcribe bien: cambiar el encoding no es
- * gratis, porque un modelo que no puede decodificar el audio no falla, inventa
- * los gastos (ver "Gastos fabricados" en el CLAUDE.md del backend).
- */
 export function RegistrarScreen({
   borrador,
   onDescartarBorrador,
   onGastosDetectados,
   onCargarManual,
 }: {
-  /** RF-41 — audio que quedo pendiente por falta de conexion */
   borrador: BorradorAudio | null;
   onDescartarBorrador: () => void;
-  /** RF-06 — abre la pantalla de confirmacion con los gastos detectados */
   onGastosDetectados: (gastos: GastoBorrador[]) => void;
   onCargarManual: () => void;
 }) {
@@ -50,20 +36,16 @@ export function RegistrarScreen({
 
   const grabador = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
 
-  // El permiso de microfono se pide una sola vez, al montar: pedirlo recien al
-  // apretar grabar mete el dialogo del sistema en el medio de la interaccion.
   useEffect(() => {
     void (async () => {
       const { granted } = await requestRecordingPermissionsAsync();
       if (!granted) return;
-      // En iOS, sin esto, grabar con el telefono en silencio no levanta audio.
       await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
     })();
   }, []);
 
   const pulso = useRef(new Animated.Value(0)).current;
 
-  // `.rec::after` — el anillo que respira alrededor del boton
   useEffect(() => {
     const animacion = Animated.loop(
       Animated.sequence([
@@ -85,7 +67,6 @@ export function RegistrarScreen({
     return () => animacion.stop();
   }, [pulso]);
 
-  // Cronometro de la grabacion
   useEffect(() => {
     if (estado !== 'grabando') return;
     const id = setInterval(() => setSegundos((s) => s + 1), 1000);
@@ -98,7 +79,6 @@ export function RegistrarScreen({
       try {
         const { gastos } = await procesarAudio(uri);
         if (gastos.length === 0) {
-          // RF-09 — la IA no entendio el audio
           Alert.alert('No te entendí', 'Probá de nuevo o cargalo a mano.', [
             { text: 'Cargar a mano', onPress: onCargarManual },
             { text: 'Reintentar', style: 'cancel' },
@@ -107,8 +87,6 @@ export function RegistrarScreen({
         }
         onGastosDetectados(gastos);
       } catch (e) {
-        // El error real importa: sin esto, "no pude procesar" tapa por igual un
-        // uri vacio, un permiso denegado y una caida del backend.
         const detalle = e instanceof Error ? e.message : String(e);
         console.log('[pocket] fallo al procesar audio:', detalle, '| uri:', uri);
         Alert.alert('No pude procesar el audio', `${detalle}
@@ -125,19 +103,9 @@ Probá de nuevo o cargalo a mano.`, [
     [onGastosDetectados, onCargarManual],
   );
 
-  /**
-   * Corta la grabacion y tira el audio: no se manda ni se procesa.
-   *
-   * Sin esto, equivocarse al hablar costaba una request igual, porque la unica
-   * forma de salir de la grabacion era el boton de stop, que manda derecho al
-   * backend. El cupo de audios es finito y trabarse dictando es lo mas comun
-   * que hay, asi que arrepentirse tiene que ser gratis.
-   */
   const cancelarGrabacion = useCallback(() => {
     void (async () => {
       try {
-        // El stop igual va: es lo que libera el microfono. Lo que no va es el
-        // uri que deja, que simplemente se descarta.
         await grabador.stop();
       } catch (e) {
         console.log('[pocket] fallo al cancelar la grabacion:', e);
@@ -187,7 +155,6 @@ Probá de nuevo o cargalo a mano.`, [
       return;
     }
 
-    // Estaba grabando: se corta y se manda el archivo.
     void (async () => {
       try {
         await grabador.stop();
@@ -205,7 +172,6 @@ Probá de nuevo o cargalo a mano.`, [
         ]);
         return;
       }
-      // `uri` recien tiene valor despues del stop.
       void procesar(grabador.uri);
     })();
   }, [estado, procesar, grabador, onCargarManual]);
@@ -219,15 +185,11 @@ Probá de nuevo o cargalo a mano.`, [
   return (
     <Pantalla>
       <Eyebrow>{formatFechaCorta(hoy)}</Eyebrow>
-      {/* Sin nombre y segun la hora: la identificacion es anonima por
-          dispositivo, asi que la hora es lo unico que sabemos de quien esta
-          del otro lado. El "Lauta" que estaba aca venia del mockup. */}
       <Hello style={{ marginTop: 7 }}>
         {saludo(hoy)}.{'\n'}
         <HelloDim>¿Qué gastaste hoy?</HelloDim>
       </Hello>
 
-      {/* RF-42 — el borrador offline aparece arriba de todo y hay que resolverlo */}
       {borrador ? (
         <View style={s.strip}>
           <View style={s.stripTxt}>
@@ -286,8 +248,6 @@ Probá de nuevo o cargalo a mano.`, [
             : 'Podés decir varios de una:\n“cinco mil en facturas y veinte mil de nafta”'}
         </Text>
 
-        {/* Solo mientras se graba: una vez que el audio salio ya se gasto la
-            request y no hay nada que cancelar. */}
         {grabando ? (
           <Pressable
             onPress={cancelarGrabacion}
@@ -301,7 +261,6 @@ Probá de nuevo o cargalo a mano.`, [
           </Pressable>
         ) : null}
 
-        {/* RF-11 — la salida manual siempre disponible */}
         <Pressable onPress={onCargarManual} accessibilityRole="button" hitSlop={8}>
           {({ pressed }) => (
             <Text style={[s.manual, pressed && { opacity: 0.6 }]}>Cargarlo a mano</Text>

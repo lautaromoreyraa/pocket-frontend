@@ -10,9 +10,7 @@ import {
 
 import { colors, fonts, tracking, type } from '../theme';
 
-/** Controles interactivos: botones, chips seleccionables e inputs. */
 
-/** `.btn` — boton principal. `ghost` es la variante secundaria. */
 export function Boton({
   titulo,
   onPress,
@@ -44,7 +42,6 @@ export function Boton({
   );
 }
 
-/** `.lnk` — accion en texto plano, sin fondo */
 export function Link({
   titulo,
   onPress,
@@ -65,7 +62,6 @@ export function Link({
   );
 }
 
-/** `.csel` — chip seleccionable de una lista de opciones */
 export function ChipSelect({
   titulo,
   activo,
@@ -75,7 +71,6 @@ export function ChipSelect({
   titulo: string;
   activo: boolean;
   onPress: () => void;
-  /** true dentro de un segmentado, para que todos midan igual */
   flex?: boolean;
 }) {
   return (
@@ -100,7 +95,6 @@ export function ChipSelect({
   );
 }
 
-/** `.usd` — el switch ARS / USD del encabezado (RF-37) */
 export function BotonMoneda({ enDolares, onPress }: { enDolares: boolean; onPress: () => void }) {
   return (
     <Pressable
@@ -116,15 +110,10 @@ export function BotonMoneda({ enDolares, onPress }: { enDolares: boolean; onPres
   );
 }
 
-/** `.lbl` — label de campo */
 export function Label({ children }: { children: React.ReactNode }) {
   return <Text style={[type.label, { marginBottom: 11 }]}>{children}</Text>;
 }
 
-/**
- * `.money-in` — el campo de monto grande con el `$` al costado.
- * Recibe y devuelve el texto ya formateado con puntos de miles.
- */
 export function MoneyInput({
   valor,
   onChange,
@@ -149,7 +138,6 @@ export function MoneyInput({
   );
 }
 
-/** `.txt-in` — input de texto comun */
 export function CampoTexto(props: TextInputProps) {
   return (
     <TextInput
@@ -161,7 +149,6 @@ export function CampoTexto(props: TextInputProps) {
   );
 }
 
-/** `.hint` — la linea con barrita pistacho que anticipa el ruteo (RF-26) */
 export function Hint({ children }: { children: React.ReactNode }) {
   return (
     <View style={s.hint}>
@@ -170,7 +157,6 @@ export function Hint({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** `.del` — accion destructiva en texto */
 export function BotonEliminar({ titulo, onPress }: { titulo: string; onPress: () => void }) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress} hitSlop={8}>

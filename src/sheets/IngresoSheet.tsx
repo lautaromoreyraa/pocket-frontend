@@ -7,16 +7,6 @@ import { Sheet } from './Sheet';
 import { colors, fonts, tracking } from '../theme';
 import { agruparMiles, formatPesos, nombreMesAnio } from '../utils/format';
 
-/**
- * Carga de los ingresos del mes — RF-32.
- *
- * Se cargan siempre a mano, nunca por audio, y son lo que habilita la capacidad
- * de ahorro (RF-33): sin ningun ingreso cargado el bloque Balance no aparece.
- *
- * Un periodo puede tener **varios** ingresos: sueldo, un alquiler que se cobra,
- * un trabajo suelto. El backend nunca reemplaza, siempre agrega; para corregir
- * uno hay que borrarlo y volver a cargarlo.
- */
 export function IngresoSheet({
   visible,
   periodo,
@@ -27,9 +17,7 @@ export function IngresoSheet({
   guardando = false,
 }: {
   visible: boolean;
-  /** yyyy-MM */
   periodo: string;
-  /** los ingresos ya cargados del mes; vacio si no hay ninguno */
   ingresos: Ingreso[];
   onGuardar: (monto: number, descripcion: string) => void;
   onEliminar: (ingreso: Ingreso) => void;

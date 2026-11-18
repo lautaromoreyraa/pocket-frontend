@@ -7,16 +7,6 @@ import { Sheet } from './Sheet';
 import { colors, fonts, tracking } from '../theme';
 import { agruparMiles, nombreMes } from '../utils/format';
 
-/**
- * Cuanto se pago ESTE MES de un gasto fijo.
- *
- * Existe porque un fijo es variable: la luz, el gas y las expensas cambian
- * todos los meses. La plantilla dice cuanto esperabas pagar; esto dice cuanto
- * pagaste, y son dos numeros distintos que no se pisan.
- *
- * Es deliberadamente chico: un campo y dos botones. Corregir un monto no puede
- * costar lo mismo que definir un fijo nuevo, si no nadie lo corrige.
- */
 export function MontoDelMesSheet({
   visible,
   item,
@@ -26,7 +16,6 @@ export function MontoDelMesSheet({
   guardando = false,
 }: {
   visible: boolean;
-  /** null cuando esta cerrado */
   item: FijoDelPeriodo | null;
   periodo: string;
   onGuardar: (monto: number) => void;
@@ -37,8 +26,6 @@ export function MontoDelMesSheet({
 
   useEffect(() => {
     if (!visible || !item) return;
-    // Arranca en lo ya registrado si esta tildado, y si no en el monto de la
-    // plantilla: en los dos casos el numero que el usuario espera ver.
     const inicial = item.montoRegistrado ?? item.fijo.monto;
     setTexto(agruparMiles(String(Math.round(inicial))));
   }, [visible, item]);

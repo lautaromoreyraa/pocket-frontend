@@ -26,14 +26,6 @@ import { CATEGORIAS, categoriaPorId } from '../data/categorias';
 import { colors, fonts, tracking } from '../theme';
 import { agruparMiles, nombreMesUpper, periodoActual, periodoSiguiente } from '../utils/format';
 
-/**
- * Alta y edicion de una PLANTILLA de gasto fijo.
- *
- * Es deliberadamente parecido a GastoFormSheet pero no es el mismo componente:
- * ahi se carga un gasto que ya ocurrio, aca se define uno que va a ocurrir
- * todos los meses. Los campos difieren (dia del mes, activo) y no hay cuotas:
- * un fijo en cuotas no es un fijo, es una compra financiada.
- */
 
 const MEDIOS: { valor: MedioPago; titulo: string }[] = [
   { valor: 'EFECTIVO', titulo: 'Efectivo' },
@@ -42,7 +34,6 @@ const MEDIOS: { valor: MedioPago; titulo: string }[] = [
   { valor: 'CREDITO', titulo: 'Crédito' },
 ];
 
-/** Tope 28: con 29, 30 o 31 habria que decidir que pasa en febrero */
 const MAX_DIA = 28;
 
 export function GastoFijoSheet({
@@ -54,7 +45,6 @@ export function GastoFijoSheet({
   guardando = false,
 }: {
   visible: boolean;
-  /** null cuando es un alta nueva */
   inicial: GastoFijo | null;
   onGuardar: (fijo: GastoFijo) => void;
   onEliminar?: () => void;
@@ -93,7 +83,6 @@ export function GastoFijoSheet({
     setDiaTexto(texto.replace(/\D/g, '').slice(0, 2));
   };
 
-  // RN-10 / RN-03: la pestaña y el mes de imputación se derivan del medio de pago
   const hint =
     medioPago === 'CREDITO'
       ? `CADA MES EL DÍA ${dia || '—'} · SE IMPUTA A ${nombreMesUpper(periodoSiguiente(periodo))} · PESTAÑA CRÉDITO`
@@ -212,11 +201,6 @@ export function GastoFijoSheet({
             <Hint>{hint}</Hint>
           </View>
 
-          {/*
-            El estado solo aparece al editar. Crear una plantilla ya pausada no
-            significa nada: estarias definiendo algo que a la vez pedis que no se
-            espere. Pausar es una accion sobre algo que ya existe.
-          */}
           {inicial ? (
             <View style={s.field}>
               <Label>Estado</Label>
