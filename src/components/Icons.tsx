@@ -3,10 +3,6 @@ import Svg, { Path, Rect } from 'react-native-svg';
 
 import { colors } from '../theme';
 
-/**
- * Los mismos SVG del mockup, uno por uno. Se mantienen los `path` tal cual
- * para que el trazo quede identico; solo cambia la sintaxis a react-native-svg.
- */
 
 interface IconProps {
   size?: number;
@@ -25,7 +21,6 @@ const base = ({ size = 20, color = colors.bone, strokeWidth = 1.8 }: IconProps) 
   strokeLinejoin: 'round' as const,
 });
 
-/** Microfono lleno: el boton grande de grabar */
 export function IconMicFilled(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -35,7 +30,6 @@ export function IconMicFilled(props: IconProps) {
   );
 }
 
-/** Microfono de la pestana Registrar */
 export function IconMic(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -45,7 +39,6 @@ export function IconMic(props: IconProps) {
   );
 }
 
-/** Tarjeta lisa: pestana Debito */
 export function IconCard(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -55,7 +48,6 @@ export function IconCard(props: IconProps) {
   );
 }
 
-/** Tarjeta con banda: pestana Credito */
 export function IconCardCredit(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -65,7 +57,6 @@ export function IconCardCredit(props: IconProps) {
   );
 }
 
-/** Flechas de repeticion: pestana Fijos (lo que se repite todos los meses) */
 export function IconRepeat(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -77,7 +68,6 @@ export function IconRepeat(props: IconProps) {
   );
 }
 
-/** Tilde: un fijo ya registrado este mes */
 export function IconCheck(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -86,7 +76,6 @@ export function IconCheck(props: IconProps) {
   );
 }
 
-/** Mas: agregar un gasto fijo */
 export function IconPlus(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -95,7 +84,6 @@ export function IconPlus(props: IconProps) {
   );
 }
 
-/** Grafico de linea: pestana Historico */
 export function IconChart(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -105,7 +93,6 @@ export function IconChart(props: IconProps) {
   );
 }
 
-/** Triangulo de alerta: gasto hormiga */
 export function IconAlert(props: IconProps) {
   return (
     <Svg {...base({ strokeWidth: 2, ...props })}>
@@ -114,7 +101,6 @@ export function IconAlert(props: IconProps) {
   );
 }
 
-/** Lapiz: editar un gasto detectado */
 export function IconPencil(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -123,7 +109,6 @@ export function IconPencil(props: IconProps) {
   );
 }
 
-/** Cruz: cerrar un formulario */
 export function IconClose(props: IconProps) {
   return (
     <Svg {...base(props)}>
@@ -132,7 +117,6 @@ export function IconClose(props: IconProps) {
   );
 }
 
-/** Cuadrado lleno: detener la grabacion */
 export function IconStop({ size = 20, color = colors.accInk }: IconProps) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">

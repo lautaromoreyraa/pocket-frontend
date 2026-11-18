@@ -3,12 +3,7 @@ import { Pressable, StyleSheet, Text, TextProps, View, ViewProps } from 'react-n
 
 import { colors, fonts, tracking, type } from '../theme';
 
-/**
- * Los bloques de texto y layout que se repiten en todas las pantallas.
- * Cada uno corresponde a una clase del mockup, indicada en el comentario.
- */
 
-/** `.eyebrow` — `DÉBITO · JULIO` */
 export function Eyebrow({ children, style, ...rest }: TextProps) {
   return (
     <Text {...rest} style={[type.eyebrow, style]}>
@@ -17,7 +12,6 @@ export function Eyebrow({ children, style, ...rest }: TextProps) {
   );
 }
 
-/** `.hello` — titulo de pantalla. El texto atenuado va en <Hello.Dim> */
 export function Hello({ children, style, ...rest }: TextProps) {
   return (
     <Text {...rest} style={[type.hello, style]}>
@@ -26,12 +20,10 @@ export function Hello({ children, style, ...rest }: TextProps) {
   );
 }
 
-/** Fragmento atenuado dentro de un Hello (`.hello span`) */
 export function HelloDim({ children }: { children: React.ReactNode }) {
   return <Text style={{ color: colors.dim }}>{children}</Text>;
 }
 
-/** `.big` — el monto grande del encabezado */
 export function BigAmount({ children, style, ...rest }: TextProps) {
   return (
     <Text {...rest} style={[type.big, style]} numberOfLines={1} adjustsFontSizeToFit>
@@ -40,12 +32,10 @@ export function BigAmount({ children, style, ...rest }: TextProps) {
   );
 }
 
-/** `.rate` — `BLUE 1.485 · 14:20`, visible solo en modo dolares (RF-39) */
 export function RateLine({ children }: { children: React.ReactNode }) {
   return <Text style={s.rate}>{children}</Text>;
 }
 
-/** `.sect` — bloque con encabezado y separador */
 export function Section({
   titulo,
   meta,
@@ -67,7 +57,6 @@ export function Section({
   );
 }
 
-/** `.stat` — fila etiqueta / monto, con separador abajo salvo la ultima */
 export function StatRow({
   etiqueta,
   valor,
@@ -77,10 +66,8 @@ export function StatRow({
 }: {
   etiqueta: string;
   valor: string;
-  /** pinta el monto en pistacho: se usa para "Podés ahorrar" */
   positivo?: boolean;
   ultima?: boolean;
-  /** si se pasa, la fila se vuelve tocable y muestra el chevron */
   onPress?: () => void;
 }) {
   const contenido = (
@@ -109,7 +96,6 @@ export function StatRow({
   );
 }
 
-/** `.item` — fila de movimiento: titulo + metadato + monto */
 export function ItemRow({
   titulo,
   meta,
@@ -120,7 +106,6 @@ export function ItemRow({
   titulo: string;
   meta: string;
   monto: string;
-  /** metadato en rojo: gasto hormiga (RF-27) */
   destacado?: boolean;
   ultima?: boolean;
 }) {
@@ -139,10 +124,6 @@ export function ItemRow({
   );
 }
 
-/**
- * `.bar-row` — fila del grafico por categoria.
- * `proporcion` va de 0 a 1 y se calcula contra el rubro mas alto.
- */
 export function BarRow({
   etiqueta,
   ocurrencias,
@@ -175,13 +156,11 @@ export function BarRow({
   );
 }
 
-/** `.foot` — pie de seccion con barrita al costado */
 export function FootNote({
   children,
   calmo = false,
 }: {
   children: React.ReactNode;
-  /** barrita gris en vez de roja */
   calmo?: boolean;
 }) {
   return (
@@ -191,7 +170,6 @@ export function FootNote({
   );
 }
 
-/** `.chip` — etiqueta de solo lectura */
 export function Chip({ children }: { children: React.ReactNode }) {
   return (
     <View style={s.chip}>

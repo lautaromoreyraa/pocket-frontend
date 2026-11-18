@@ -10,18 +10,6 @@ import { getGastos } from '../api/pocket';
 import { useMoneda } from '../context/MonedaContext';
 import { formatFechaDiaMes, nombreMesAnio } from '../utils/format';
 
-/**
- * Pantalla "Todos los movimientos" del periodo.
- *
- * No esta en el mockup: es una extension pedida despues. Reusa el lenguaje
- * visual que ya existe —eyebrow, monto grande, `.sect-hd` como encabezado de
- * dia, `.item` para cada fila— asi que no introduce estilos nuevos.
- *
- * Se llega desde tres lugares (RF-12):
- *   - boton "Ver más movimientos" de Debito
- *   - boton "Ver más movimientos" de Credito
- *   - filas Debito y Credito del Historico
- */
 export function MovimientosScreen({
   visible,
   periodo,
@@ -29,7 +17,6 @@ export function MovimientosScreen({
   onCerrar,
 }: {
   visible: boolean;
-  /** yyyy-MM */
   periodo: string;
   credito: boolean;
   onCerrar: () => void;
@@ -53,7 +40,6 @@ export function MovimientosScreen({
     cargar();
   }, [visible, cargar]);
 
-  /** Agrupados por dia, del mas reciente al mas viejo */
   const porDia = useMemo(() => {
     if (!gastos) return [];
     const mapa = new Map<string, Gasto[]>();
@@ -159,7 +145,6 @@ export function MovimientosScreen({
   );
 }
 
-/** `SUPERMERCADO · EFECTIVO`, o `HOGAR · CUOTA 2/6` cuando es una cuota */
 function metaDeGasto(g: Gasto): string {
   const partes = [g.categoriaNombre.toUpperCase()];
   if (g.nroCuota && g.cantidadCuotas) {
